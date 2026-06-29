@@ -1,1 +1,33 @@
-services: { }
+# 평가자용 풀스택 실행: `docker compose up` 으로 PostgreSQL + 애플리케이션을 함께 띄운다.
+# 별도 상용 계정/자격 증명 없이 로컬에서 바로 실행 가능하다(요구 6).
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: realteeth
+      POSTGRES_USER: realteeth
+      POSTGRES_PASSWORD: realteeth
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U realteeth -d realteeth"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  app:
+    build: .
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: realteeth
+      DB_USERNAME: realteeth
+      DB_PASSWORD: realteeth
+      # Mock Worker API Key 발급에 쓰이는 지원자 정보(화이트리스트 대조). 필요 시 덮어쓴다.
+      MOCK_WORKER_CANDIDATE_NAME: ${MOCK_WORKER_CANDIDATE_NAME:-ingkoon}
+      MOCK_WORKER_EMAIL: ${MOCK_WORKER_EMAIL:-ingkoon@example.com}
+    ports:
+      - "8080:8080"

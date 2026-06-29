@@ -3,6 +3,7 @@ plugins {
     id 'org.springframework.boot' version '3.2.4'
     id 'io.spring.dependency-management' version '1.1.7'
     id 'org.asciidoctor.jvm.convert' version '4.0.5'
+    id 'com.epages.restdocs-api-spec' version '0.19.4'
 }
 
 group = 'io.github.ingkoon'
@@ -28,17 +29,26 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
     implementation 'org.springframework.boot:spring-boot-starter-validation'
     implementation 'org.springframework.boot:spring-boot-starter-web'
-    implementation 'org.springframework.boot:spring-boot-starter-webflux'
+    implementation 'org.flywaydb:flyway-core'
+    implementation 'com.querydsl:querydsl-jpa::jakarta'
+    annotationProcessor 'com.querydsl:querydsl-apt::jakarta'
+    annotationProcessor 'jakarta.annotation:jakarta.annotation-api'
+    annotationProcessor 'jakarta.persistence:jakarta.persistence-api'
+    // Swagger UI: 생성된 OpenAPI3 스펙(build/api-spec/openapi3.json)을 /swagger-ui.html에서 렌더링
+    implementation 'org.webjars:swagger-ui:5.17.14'
+    implementation 'org.webjars:webjars-locator-core'
     compileOnly 'org.projectlombok:lombok'
     developmentOnly 'org.springframework.boot:spring-boot-devtools'
     developmentOnly 'org.springframework.boot:spring-boot-docker-compose'
+    runtimeOnly 'org.postgresql:postgresql'
     runtimeOnly 'com.h2database:h2'
     annotationProcessor 'org.projectlombok:lombok'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation 'org.springframework.boot:spring-boot-testcontainers'
-    testImplementation 'io.projectreactor:reactor-test'
     testImplementation 'org.springframework.restdocs:spring-restdocs-mockmvc'
+    testImplementation 'com.epages:restdocs-api-spec-mockmvc:0.19.4'
     testImplementation 'org.testcontainers:junit-jupiter'
+    testImplementation 'org.testcontainers:postgresql'
     testCompileOnly 'org.projectlombok:lombok'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
     testAnnotationProcessor 'org.projectlombok:lombok'
@@ -52,4 +62,19 @@ tasks.named('test') {
 tasks.named('asciidoctor') {
     inputs.dir snippetsDir
     dependsOn test
+}
+
+// restdocs-api-spec: REST Docs 문서화 테스트에서 OpenAPI3 스펙을 생성한다(build/api-spec/openapi3.json).
+// 생성된 스펙은 정적 리소스(src/main/resources/static/docs/openapi3.json)로 커밋해 둔다.
+// → IDE 직접 실행 / bootRun / jar 어디서든 processResources를 거쳐 /docs/openapi3.json 으로 서빙된다.
+//   (Gradle 태스크에 끼워 넣는 방식은 IDE 직접 실행 시 누락돼 404가 났음.)
+//
+// API 변경 시 재생성:  ./gradlew openapi3  &&  cp build/api-spec/openapi3.json src/main/resources/static/docs/
+// (문서화 테스트가 요청/응답 필드 불일치를 잡아주므로 스펙이 코드와 어긋나면 빌드가 실패한다.)
+openapi3 {
+    server = 'http://localhost:8080'
+    title = 'Image Processing API'
+    description = '이미지 처리 위임 서버 API. 접수/조회/목록.'
+    version = '0.0.1'
+    format = 'json'
 }
