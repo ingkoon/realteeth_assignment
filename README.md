@@ -86,6 +86,7 @@ curl "http://localhost:8080/api/jobs?status=PROCESSING&page=0&size=20"
 ## 설계 설명 (요구 5)
 
 ### 상태 모델 설계 의도 (요구 4.2)
+기본적으로 스케줄러를 통항 DB 폴링 방식으로 비동기 작업에 대한 상태값 관리를 수행합니다.
 
 현재 서버 기준 **6상태**를 둡니다. Worker는 `PROCESSING/COMPLETED/FAILED` 3상태뿐이지만, 그 앞에
 `PENDING`·`DISPATCHED`를 추가해 **"요청을 아직 안 보낸 상태" vs "보낸 상태"**을 상태로 구분합니다.
