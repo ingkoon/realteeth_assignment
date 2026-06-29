@@ -1,0 +1,47 @@
+spring:
+  application:
+    name: realteeth_assignment
+
+  # 영속성: 운영은 PostgreSQL(상태의 source of truth, 재시작 복구·SKIP LOCKED 동시성 보장).
+  # 평가자는 docker compose가 띄운 DB로 접속하며, 환경변수로 덮어쓸 수 있다.
+  datasource:
+    url: "jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:realteeth}"
+    username: ${DB_USERNAME:realteeth}
+    password: ${DB_PASSWORD:realteeth}
+
+  jpa:
+    # 스키마는 Flyway가 관리하고, Hibernate는 검증만 한다(운영 스키마 드리프트 방지).
+    hibernate:
+      ddl-auto: validate
+    open-in-view: false
+
+  flyway:
+    enabled: true
+
+  # 로컬 bootRun 시 PostgreSQL을 자동 기동한다(DB 전용 compose 파일 사용 → app 서비스 재귀 기동 방지).
+  # 컨테이너로 실행하는 jar에는 spring-boot-docker-compose가 없으므로 이 설정은 무시된다.
+  docker:
+    compose:
+      file: compose-dev.yaml
+
+# 작업 처리(디스패치/폴링/복구) 스케줄러
+job-processing:
+  scheduling-enabled: true
+  dispatch-interval-ms: 1000
+  poll-interval-ms: 2000
+  timeout-sweep-interval-ms: 15000
+  batch-size: 10
+  max-retries: 5
+  retry-backoff-base: 2s
+  retry-backoff-max: 60s
+  lease-duration: 60s
+  poll-delay: 3s
+  job-timeout: 10m
+
+# Mock Worker (외부 이미지 처리 서비스) 연동
+mock-worker:
+  base-url: https://dev.realteeth.ai
+  candidate-name: ${MOCK_WORKER_CANDIDATE_NAME:이인재}
+  email: ${MOCK_WORKER_EMAIL:dlswotmd@gmail.com}
+  connect-timeout: 5s
+  read-timeout: 30s

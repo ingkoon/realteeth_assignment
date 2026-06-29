@@ -1,0 +1,31 @@
+# 빠른 단위/슬라이스 테스트용 설정. Docker 없이 H2(PostgreSQL 호환 모드)로 즉시 부팅한다.
+# 동시성 핵심 검증(SKIP LOCKED 등)은 H2로 의미가 없으므로 별도 Testcontainers PostgreSQL 테스트에서 다룬다.
+spring:
+  application:
+    name: realteeth_assignment
+
+  datasource:
+    url: "jdbc:h2:mem:testdb;MODE=PostgreSQL;DB_CLOSE_DELAY=-1"
+    username: sa
+    password: ""
+
+  jpa:
+    # 테스트에서는 Flyway 대신 Hibernate가 스키마를 생성한다(H2/PG SQL 방언 차이 회피).
+    hibernate:
+      ddl-auto: create-drop
+    open-in-view: false
+
+  flyway:
+    enabled: false
+
+# 테스트에서는 백그라운드 스케줄러를 끈다(외부 호출 방지). 스케줄러 로직은 단위 테스트로 직접 검증한다.
+job-processing:
+  scheduling-enabled: false
+
+# Mock Worker 설정(컨텍스트 로딩용 더미값). 실제 호출은 lazy라 컨텍스트 로딩 시 발생하지 않는다.
+mock-worker:
+  base-url: https://worker.test
+  candidate-name: tester
+  email: tester@example.com
+  connect-timeout: 5s
+  read-timeout: 30s

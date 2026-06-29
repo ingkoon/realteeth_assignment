@@ -35,3 +35,7 @@ out/
 
 ### VS Code ###
 .vscode/
+
+### Generated sources (QueryDSL APT / IDE annotation processing) ###
+src/main/generated/
+out/

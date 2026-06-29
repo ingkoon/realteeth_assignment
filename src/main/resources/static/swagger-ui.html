@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>Image Processing API — Swagger UI</title>
+    <link rel="stylesheet" href="/webjars/swagger-ui/swagger-ui.css">
+</head>
+<body>
+<div id="swagger-ui"></div>
+<script src="/webjars/swagger-ui/swagger-ui-bundle.js"></script>
+<script>
+    // REST Docs 테스트에서 생성·검증된 OpenAPI3 스펙을 로드한다.
+    window.onload = () => {
+        window.ui = SwaggerUIBundle({
+            url: '/docs/openapi3.json',
+            dom_id: '#swagger-ui'
+        });
+    };
+</script>
+</body>
+</html>

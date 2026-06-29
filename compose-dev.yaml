@@ -1,0 +1,16 @@
+# 로컬 개발용: PostgreSQL만 띄운다. 애플리케이션은 `./gradlew bootRun`으로 호스트에서 실행한다.
+# spring-boot-docker-compose가 bootRun 시 이 파일을 자동 기동한다(application.properties의 spring.docker.compose.file).
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: realteeth
+      POSTGRES_USER: realteeth
+      POSTGRES_PASSWORD: realteeth
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U realteeth -d realteeth"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
